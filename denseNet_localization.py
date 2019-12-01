@@ -19,10 +19,11 @@ import os
 import pickle
 from collections import defaultdict
 from collections import OrderedDict
-
+import imageio
 import skimage
 from skimage.io import *
 from skimage.transform import *
+from collections import OrderedDict
 
 import scipy
 import scipy.ndimage as ndimage
@@ -44,7 +45,8 @@ test_X = []
 print("load and transform image")
 for i in range(len(test_list)):
     image_path = os.path.join(img_folder_path, test_list[i])
-    img = scipy.misc.imread(image_path)
+    print(image_path)
+    img = imageio.imread(image_path)
     if img.shape != (1024,1024):
         img = img[:,:,0]
     img_resized = skimage.transform.resize(img,(256,256))
@@ -73,9 +75,35 @@ class DenseNet121(nn.Module):
 		x = self.densenet121(x)
 		return x
 
-model = DenseNet121(8).cuda()
+model = DenseNet121(8)
 model = torch.nn.DataParallel(model)
-model.load_state_dict(torch.load("model/DenseNet121_aug4_pretrain_WeightBelow1_1_0.829766922537.pkl"))
+checkpoint = torch.load("model/DenseNet121_aug4_pretrain_WeightBelow1_1_0.829766922537.pkl",map_location=torch.device('cpu'))
+def func(keys_passed):
+  change = ['.0.','.1.','.2.']
+  if change[0] in keys_passed:
+    i = change[0]
+    b = keys_passed.split(i)
+    b.insert(1,i[1:])
+    c = ''.join(b)
+    return keys_passed
+  elif change[1] in keys_passed:
+    i = change[1]
+    b = keys_passed.split(i)
+    b.insert(1,i[1:])
+    c = ''.join(b)
+    return c
+  elif change[2] in keys_passed:
+    i = change[2]
+    b = keys_passed.split(i)
+    b.insert(1,i[1:])
+    c = ''.join(b)
+    return c
+  else:
+    return keys_passed  
+
+final_dic = {func(key):value for key, value in checkpoint.items()}
+checkpoint = OrderedDict(final_dic)
+model.load_state_dict(checkpoint)
 print("model loaded")
 
 
@@ -98,6 +126,7 @@ class ChestXrayDataSet_plot(Dataset):
 		return image
 	def __len__(self):
 		return len(self.X)
+
 
 test_dataset = ChestXrayDataSet_plot(input_X = test_X,transform=transforms.Compose([
                                         transforms.ToPILImage(),
@@ -169,7 +198,7 @@ class GradCAM(PropagationBase):
 
     def _normalize(self, grads):
         l2_norm = torch.sqrt(torch.mean(torch.pow(grads, 2))) + 1e-5
-        return grads / l2_norm.data[0]
+        return grads / l2_norm.data.item()
 
     def _compute_grad_weights(self, grads):
         grads = self._normalize(grads)
@@ -208,15 +237,15 @@ heatmap_output = []
 image_id = []
 output_class = []
 
-gcam = GradCAM(model=model, cuda=True)
+gcam = GradCAM(model=model, cuda=False)
 for index in range(len(test_dataset)):
-    input_img = Variable((test_dataset[index]).unsqueeze(0).cuda(), requires_grad=True)
+    input_img = Variable((test_dataset[index]).unsqueeze(0), requires_grad=True)
     probs = gcam.forward(input_img)
 
     activate_classes = np.where((probs > thresholds)[0]==True)[0] # get the activated class
     for activate_class in activate_classes:
         gcam.backward(idx=activate_class)
-        output = gcam.generate(target_layer="module.densenet121.features.denseblock4.denselayer16.conv.2")
+        output = gcam.generate(target_layer="module.densenet121.features.denseblock4.denselayer16.conv2")
         #### this output is heatmap ####
         if np.sum(np.isnan(output)) > 0:
             print("fxxx nan")
