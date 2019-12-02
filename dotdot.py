@@ -26,6 +26,8 @@ import scipy.ndimage.filters as filters
 from scipy.ndimage import binary_dilation
 import matplotlib.patches as patches
 
+
+
 def dot(image_bytes,prediction):
     '''
     img_folder_path='./00000002_000.png'
@@ -50,13 +52,14 @@ def dot(image_bytes,prediction):
     k = str(k)    
     ln = './static/chhati'+k+'.jpg'    
 
-    cv2.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),3) #rgb 220,20,60
+    cv2.rectangle(frame,(x1,y1),(x2,y2),(255,255,255),3) #rgb 220,20,60
     #cv2.rectangle(frame,(x1,y1),(x2,y2),(60,20,220),3)
     #print(frame)
+    
     cv2.imwrite(ln,frame)
-    cv2.imshow('image',frame)
-    cv2.waitKey(10000)
-    cv2.destroyAllWindows()
+    #cv2.imshow('image',frame)
+    #cv2.waitKey(10000)
+#    cv2.destroyAllWindows()
 
 
     return ln

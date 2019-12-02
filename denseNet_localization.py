@@ -256,6 +256,10 @@ for index in range(len(test_dataset)):
 
 print("heatmap output done")
 print("total number of heatmap: ",len(heatmap_output))
+#for i in heatmap_output:
+ #   cv2.imshow('heatmap',i)
+  #  cv2.waitKey(1000)
+   # cv2.destroyAllWindows()
 
 # ======= Plot bounding box =========
 img_width, img_height = 224, 224

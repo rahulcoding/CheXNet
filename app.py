@@ -1,7 +1,7 @@
 from flask import Flask,request,render_template
 app = Flask(__name__)
 
-from commons import baki_ka_chod
+from commons import rest_of
 from dotdot import dot
 
 @app.route('/',methods = ['GET','POST'])
@@ -16,9 +16,10 @@ def hello():
 			return 
 		file = request.files['file']
 		image = file.read()
-		predictions = baki_ka_chod(image_bytes=image)
+		predictions = rest_of(image_bytes=image)
 		path = dot(image_bytes=image,prediction=predictions)
-		return render_template('result.html',xray = predictions,image_path=path)
+		k = predictions[0][1].split(" ")[0]
+	return render_template('result.html',xray = predictions,image_path=path,des=k)
 
 
 if __name__ == '__main__':

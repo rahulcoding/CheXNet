@@ -131,7 +131,7 @@ def get_tensor(image_bytes):
                                         ]))
 	return test_dataset
 
-def baki_ka_chod(image_bytes):
+def rest_of(image_bytes):
 	test_dataset= get_tensor(image_bytes)
 	model = get_model()
 	thresholds = np.load("thresholds.npy")
@@ -321,7 +321,7 @@ def baki_ka_chod(image_bytes):
 	            prediction_dict[img_id].append(prediction_sent)
 	return prediction_dict
 
-print("JAI_____HO")
+print("----EXECUTION COMPLETED----")
 """
 	with open("bounding_box.txt","w") as f:
 		for i in range(len(prediction_dict)):
@@ -336,13 +336,4 @@ print("JAI_____HO")
 				f.write(p+"\n")
 	
 """
-"""
-def get_tensor(image_bytes):
-	image = Image.open(io.BytesIO(image_bytes))
-	print(type(image))	
-	imag = np.array(image)
-	print(type(imag))
-	print(imag)
-	print("*****")
-	return imag
-"""
+
